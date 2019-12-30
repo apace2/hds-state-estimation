@@ -43,9 +43,10 @@ class HDS:
         return process
 
     def measurementTerms(self, x):
-        meas = np.zeros((self.T, self.y.shape[1]))
-        for t in range(self.T):
-            meas[t, :] = self.y[t, :] - self.C.dot(x[t, :])
+        #meas = np.zeros((self.T, self.y.shape[1]))
+        #for t in range(self.T):
+        #    meas[t, :] = self.y[t, :] - self.C.dot(x[t, :])
+        meas = self.y - (self.C @ x.T).T
         return meas
 
     def processErrors(self, w, terms):
