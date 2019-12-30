@@ -4,21 +4,22 @@ import simplex
 import solveTridiag
 import lineSearch
 import FISTA
-from functools import reduce
 import gradientTest
 
 class HDS:
 
-    def __init__(self,y,G,dG,C,Qinv,Rinv,x0,r):
+    def __init__(self, y, G, dG, C, Qinv, Rinv, x0, r):
         """
-        y - measurements
-        G - list of models x^k+1 = G(x)
-        dG - list of gradients of model
-        C - observation matrix (y = Cx)
-        Qinv - process noise covariance
-        Rinv - measurement noise covariance
-        x0 - initial state
-        r - student's t degree of freedom
+
+        Args:
+            y:
+            G:
+            dG:
+            C:
+            Qinv:
+            Rinv:
+            x0:
+            r:
         """
         self.y = y
         self.G = G
@@ -33,15 +34,15 @@ class HDS:
         self.d = x0.shape[0]
         self.m = len(G[0])
 
-    def processTerms(self,x):
-        process = np.zeros((self.T,self.m,self.d))
+    def processTerms(self, x):
+        process = np.zeros((self.T, self.m, self.d))
         for i in range(self.m):
             for t in range(self.T):
                 #as self.G is a function don't think this can be vectorized
                 if t == 0:
-                    process[t,i,:] = x[0,:] - self.G[t][i](self.x0)
+                    process[t, i, :] = x[0, :] - self.G[t][i](self.x0)
                 else:
-                    process[t,i,:] = x[t,:] - self.G[t][i](x[t-1,:])
+                    process[t, i, :] = x[t, :] - self.G[t][i](x[t-1, :])
         return process
 
     def measurementTerms(self,x):
@@ -125,17 +126,17 @@ class HDS:
         return gx,Ds,Ss
 
 
-    def solveTridiag(self,gx,dM,sM):
-        N = len(dM)
-        iM = [np.linalg.inv(dM[0])]
-        for i in range(1,N):
-            iM.append(np.linalg.inv(dM[i]-sM[i-1].dot(iM[i-1]).dot(np.transpose(sM[i-1]))))
-            gx[i] = gx[i]-sM[i-1].dot(iM[i-1].dot(gx[i-1]))
-        dx = [iM[-1].dot(gx[-1])]
-        for i in range(N-2,-1,-1):
-            gx[i] = -np.transpose(sM[i]).dot(dx[0]) + gx[i]
-            dx.insert(0,iM[i].dot(gx[i]))
-        return dx
+    # def solveTridiag(self,gx,dM,sM):
+    #     N = len(dM)
+    #     iM = [np.linalg.inv(dM[0])]
+    #     for i in range(1,N):
+    #         iM.append(np.linalg.inv(dM[i]-sM[i-1].dot(iM[i-1]).dot(np.transpose(sM[i-1]))))
+    #         gx[i] = gx[i]-sM[i-1].dot(iM[i-1].dot(gx[i-1]))
+    #     dx = [iM[-1].dot(gx[-1])]
+    #     for i in range(N-2,-1,-1):
+    #         gx[i] = -np.transpose(sM[i]).dot(dx[0]) + gx[i]
+    #         dx.insert(0,iM[i].dot(gx[i]))
+    #     return dx
 
     def solveGNDirection(self,x,w,verbose = False):
         gx,Ds,Ss = self.buildGNMatrices(x,w)
