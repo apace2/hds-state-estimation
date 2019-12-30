@@ -1,22 +1,23 @@
 import numpy as np
 import copy
-import utils
-import gradientTest
+from . import utils
+from . import gradientTest
+
 
 class HDS:
 
     def __init__(self, y, G, dG, C, Qinv, Rinv, x0, r):
         """
-
+        Hybrid domain system class
         Args:
-            y:
-            G:
-            dG:
-            C:
-            Qinv:
-            Rinv:
-            x0:
-            r:
+            y: measurements
+            G: list of process models
+            dG: list of derivative of process models
+            C: observation model
+            Qinv: inverse of process noise covariance matrix
+            Rinv: inverse of measurement noise covariance matrix
+            x0: initial state
+            r: degrees of freedom for student's t distribution
         """
         self.y = y
         self.G = G
@@ -42,7 +43,9 @@ class HDS:
         return process
 
     def measurementTerms(self, x):
-        meas = self.y - (self.C@x.T).T
+        meas = np.zeros((self.T, self.y.shape[1]))
+        for t in range(self.T):
+            meas[t, :] = self.y[t, :] - self.C.dot(x[t, :])
         return meas
 
     def processErrors(self, w, terms):
@@ -116,7 +119,7 @@ class HDS:
         return dx
 
     def updateX(self, x, w, iter=1):
-        f = lambda x:self.computeObj(x, w, 0.0, 0.0)
+        f = lambda x: self.computeObj(x, w, 0.0, 0.0)
         loss = []
         for k in range(iter):
             dx = self.solveGNDirection(x, w)
