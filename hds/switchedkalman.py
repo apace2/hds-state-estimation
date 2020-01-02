@@ -43,10 +43,10 @@ class SwitchedKalman:
         return process
 
     def measurementTerms(self, x):
-        # meas = np.zeros((self.T,self.y.shape[1]))
-        # for t in range(self.T):
-        #    meas[t,:] = self.y[t,:] - self.C.dot(x[t,:])
-        meas = self.y - (self.C @ x.T).T
+        meas = np.zeros((self.T,self.y.shape[1]))
+        for t in range(self.T):
+           meas[t,:] = self.y[t,:] - self.C.dot(x[t,:])
+        #meas = self.y - (self.C @ x.T).T
         return meas
 
     def processErrors(self, w, terms):
@@ -158,10 +158,10 @@ class SwitchedKalman:
 
         def prox(z):
             for t in range(self.T):
-                z[t, :] = simplex.simplexConstr(z[t, :])
+                z[t, :] = utils.simplexConstr(z[t, :])
             return z
 
-        return FISTA.FISTA(w, g, prox, f, L, iter=iter)
+        return utils.FISTA(w, g, prox, f, L, iter=iter)
 
     def gradTest(self, x, w, nu, beta, pert=1e-1):
 
