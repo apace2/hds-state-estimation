@@ -18,6 +18,7 @@ class SwitchedKalman:
             x0: initial state
             r: degrees of freedom for student's t distribution
         """
+        assert C.ndim == 2, "Observation model must be have dimension of 2."
         self.y = y
         self.G = G
         self.dG = dG
@@ -43,10 +44,10 @@ class SwitchedKalman:
         return process
 
     def measurementTerms(self, x):
-        meas = np.zeros((self.T,self.y.shape[1]))
-        for t in range(self.T):
-           meas[t,:] = self.y[t,:] - self.C.dot(x[t,:])
-        #meas = self.y - (self.C @ x.T).T
+        #meas = np.zeros((self.T,self.y.shape[1]))
+        #for t in range(self.T):
+        #   meas[t,:] = self.y[t,:] - self.C.dot(x[t,:])
+        meas = self.y - (self.C @ x.T).T
         return meas
 
     def processErrors(self, w, terms):
